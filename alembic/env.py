@@ -14,6 +14,13 @@ from app.database import Base
 from app.models import *  # Import all models
 from app.config import settings
 
+# Convert Railway's sync URL to async URL for asyncpg (same as database.py)
+def get_async_database_url(url: str) -> str:
+    """Convert postgresql:// to postgresql+asyncpg:// for Railway compatibility"""
+    if url and url.startswith('postgresql://') and '+asyncpg' not in url:
+        return url.replace('postgresql://', 'postgresql+asyncpg://', 1)
+    return url
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -23,8 +30,8 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Set the database URL from settings
-config.set_main_option("sqlalchemy.url", settings.database_url)
+# Set the database URL from settings with asyncpg conversion for Railway
+config.set_main_option("sqlalchemy.url", get_async_database_url(settings.database_url))
 
 # add your model's MetaData object here
 # for 'autogenerate' support

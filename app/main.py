@@ -61,7 +61,12 @@ app.include_router(budgets.router, prefix="/budgets", tags=["Budgets"])
 @app.on_event("startup")
 async def startup_event():
     """Initialize database on startup"""
-    await init_db()
+    try:
+        await init_db()
+        print("Database initialized successfully")
+    except Exception as e:
+        print(f"Database initialization failed: {e}")
+        # Don't fail startup - let health check handle it
 
 
 @app.get("/")
@@ -76,13 +81,26 @@ async def root(request: Request):
 
 
 @app.get("/health")
-@limiter.limit("30/minute")
-async def health_check(request: Request):
-    """Health check endpoint"""
-    return {
-        "status": "healthy",
-        "environment": settings.environment
-    }
+async def health_check():
+    """Health check endpoint - no rate limiting for Railway"""
+    try:
+        # Test database connection
+        from app.database import AsyncSessionLocal
+        async with AsyncSessionLocal() as session:
+            await session.execute("SELECT 1")
+        
+        return {
+            "status": "healthy",
+            "environment": settings.environment,
+            "database": "connected"
+        }
+    except Exception as e:
+        return {
+            "status": "unhealthy",
+            "environment": settings.environment,
+            "database": "disconnected",
+            "error": str(e)
+        }
 
 
 if __name__ == "__main__":

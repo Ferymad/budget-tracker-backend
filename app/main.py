@@ -81,25 +81,12 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint - no rate limiting for Railway"""
-    try:
-        # Test database connection
-        from app.database import AsyncSessionLocal
-        async with AsyncSessionLocal() as session:
-            await session.execute("SELECT 1")
-        
-        return {
-            "status": "healthy",
-            "environment": settings.environment,
-            "database": "connected"
-        }
-    except Exception as e:
-        return {
-            "status": "unhealthy",
-            "environment": settings.environment,
-            "database": "disconnected",
-            "error": str(e)
-        }
+    """Simple health check endpoint for Railway - no database dependency"""
+    return {
+        "status": "healthy",
+        "environment": settings.environment,
+        "service": "budget-tracker-backend"
+    }
 
 
 if __name__ == "__main__":

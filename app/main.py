@@ -70,9 +70,8 @@ async def startup_event():
 
 
 @app.get("/")
-@limiter.limit("10/minute")
-async def root(request: Request):
-    """Root endpoint"""
+async def root():
+    """Root endpoint - no rate limiting for Railway healthchecks"""
     return {
         "message": "Budget Tracker API",
         "version": "1.0.0",

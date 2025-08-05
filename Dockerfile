@@ -38,5 +38,5 @@ EXPOSE 8000
 # Railway handles health checks via HTTP requests to the service
 # Removing Docker health check to avoid PORT conflicts
 
-# Run the application with database migration
-CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Run the application with database migration (Railway expects port 8000)
+CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]

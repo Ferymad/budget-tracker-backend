@@ -4,9 +4,16 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
 from app.config import settings
 
-# Create async engine
+# Convert Railway's sync URL to async URL for asyncpg
+def get_async_database_url(url: str) -> str:
+    """Convert postgresql:// to postgresql+asyncpg:// for Railway compatibility"""
+    if url and url.startswith('postgresql://') and '+asyncpg' not in url:
+        return url.replace('postgresql://', 'postgresql+asyncpg://', 1)
+    return url
+
+# Create async engine with URL conversion for Railway
 engine = create_async_engine(
-    settings.database_url,
+    get_async_database_url(settings.database_url),
     echo=settings.debug,
     poolclass=NullPool,  # Use NullPool for async
     future=True

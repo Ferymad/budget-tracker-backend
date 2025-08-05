@@ -32,11 +32,10 @@ RUN adduser --disabled-password --gecos '' appuser \
     && chown -R appuser:appuser /app
 USER appuser
 
-# Expose port (Railway will provide PORT env var)
-EXPOSE 8000
+# Railway will provide dynamic PORT env var at runtime
 
 # Railway handles health checks via HTTP requests to the service
 # Removing Docker health check to avoid PORT conflicts
 
-# Run the application with database migration (Railway expects port 8000)
-CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+# Run the application with database migration (use Railway's dynamic PORT)
+CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT"]
